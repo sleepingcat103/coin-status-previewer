@@ -16,6 +16,7 @@ module.exports = async ({ req, res, log, error }) => {
   })
   
   return res.send(`
+  <!DOCTYPE html>
   <html>
     <head>
       <title>BTC</title>  
