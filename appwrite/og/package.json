@@ -7,6 +7,10 @@
       "format": "prettier --write ."
     },
     "dependencies": {
+      "bybit-api": "^3.9.7",
+      "canvas": "^2.11.2",
+      "chart.js": "^3.9.1",
+      "chartjs-node-canvas": "^4.1.6",
       "node-appwrite": "^9.0.0"
     },
     "devDependencies": {

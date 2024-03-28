@@ -1,33 +1,60 @@
-// import { Client } from 'node-appwrite';
 
-// This is your Appwrite function
-// It's executed each time we get a request
-export default async ({ req, res, log, error }) => {
-  // Why not try the Appwrite SDK?
-  //
-  // const client = new Client()
-  //    .setEndpoint('https://cloud.appwrite.io/v1')
-  //    .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-  //    .setKey(process.env.APPWRITE_API_KEY);
+const { RestClientV5 } = require('bybit-api');
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const BybitClient = new RestClientV5();
 
-  // You can log messages to the console
-  log('Hello, Logs!');
+module.exports = async ({ req, res, log, error }) => {
+  const { target } = req.params;
+  
+  const canvasRenderService = new ChartJSNodeCanvas({ width: 100, height: 100 });
+  const dataset = await kLineData('BTCUSD'); 
+  const configuration = generateChartJsConfig(dataset.reverse())
 
-  // If something goes wrong, log an error
-  error('Hello, Errors!');
-
-  // The `req` object contains the request data
-  if (req.method === 'GET') {
-    // Send a response with the res object helpers
-    // `res.send()` dispatches a string back to the client
-    return res.send('Hello, World!');
-  }
-
-  // `res.json()` is a handy helper for sending JSON
-  return res.json({
-    motto: 'Build like a team of hundreds_',
-    learn: 'https://appwrite.io/docs',
-    connect: 'https://appwrite.io/discord',
-    getInspired: 'https://builtwith.appwrite.io',
-  });
+  res.set('Content-Type', 'image/png');
+  res.status(200);
+  const stream = canvasRenderService.renderToStream(configuration);
+  stream.pipe(res);
 };
+
+function generateChartJsConfig(dataset) {
+
+  const now = dataset[dataset.length - 1];
+
+  return {
+    type: 'line',
+    data: {
+      labels: Array.from(dataset).fill(''),
+      datasets: [{
+        data: dataset,
+        fill: false,
+        borderColor: 'rgb(75, 192, 192)',
+        pointRadius: 0
+      }, {
+        data: Array.from(dataset).fill(now),
+        fill: false,
+        borderColor: 'red',
+        pointRadius: 0
+      }]
+    },
+    options: {
+      plugins: {
+        legend: false
+      },
+      scales: {
+        x: {
+          display: false
+        },
+        y: {
+          display: false
+        }
+      },
+    }
+  };
+}
+
+function kLineData(symbol) {
+  return BybitClient.getKline({ symbol, interval: '360' })
+  .then((response) => {
+    return (response?.result?.list || []).map(d => d[4])
+  })
+}
