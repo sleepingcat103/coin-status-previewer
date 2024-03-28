@@ -13,7 +13,7 @@ module.exports = async ({ req, res, log, error }) => {
   res.set('Content-Type', 'image/png');
   res.status(200);
   const stream = canvasRenderService.renderToStream(configuration);
-  stream.pipe(res);
+  return stream.pipe(res);
 };
 
 function generateChartJsConfig(dataset) {

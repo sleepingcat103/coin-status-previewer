@@ -15,7 +15,7 @@ module.exports = async ({ req, res, log, error }) => {
     limit: 1,
   })
   
-  res.send(`
+  return res.send(`
   <html>
     <head>
       <title>BTC</title>  
